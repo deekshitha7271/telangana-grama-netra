@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  Drone, 
+  Plane, 
   MapPin, 
   AlertTriangle, 
   CheckCircle, 
@@ -93,7 +93,7 @@ const DroneMonitoring = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Drone className={`h-5 w-5 ${drone.status === 'active' ? 'text-green-600' : 'text-gray-400'}`} />
+                  <Plane className={`h-5 w-5 ${drone.status === 'active' ? 'text-green-600' : 'text-gray-400'}`} />
                   <span className="font-semibold">{drone.id}</span>
                 </div>
                 <Badge variant={drone.status === 'active' ? 'default' : 'secondary'}>
@@ -190,7 +190,7 @@ const DroneMonitoring = () => {
       <Card className="bg-gradient-to-r from-blue-500 to-green-500 text-white border-0">
         <CardContent className="p-6">
           <div className="text-center">
-            <Drone className="h-12 w-12 mx-auto mb-4 animate-bounce" />
+            <Plane className="h-12 w-12 mx-auto mb-4 animate-bounce" />
             <h3 className="text-2xl font-bold mb-2">Currently Scanning: {scanningVillage}</h3>
             <p className="text-blue-100">AI-powered anomaly detection in progress...</p>
             <div className="flex justify-center items-center gap-4 mt-4">

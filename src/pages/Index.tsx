@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Drone, 
+  Plane, 
   Mic, 
   AlertTriangle, 
   MapPin, 
@@ -35,7 +35,7 @@ const Index = () => {
 
   const features = [
     {
-      icon: Drone,
+      icon: Plane,
       title: "Autonomous Drone Sweeps",
       description: "AI-powered drones scan villages for infrastructure issues, health risks, and maintenance needs",
       color: "bg-blue-500"
