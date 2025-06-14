@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,6 +118,14 @@ const Index = () => {
               >
                 <Plane className="mr-2 h-5 w-5 animate-bounce" />
                 Launch Monitoring
+              </Button>
+              <Button 
+                size="lg" 
+                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg transform hover:scale-105 hover:shadow-xl transition-all duration-300 animate-glow"
+                onClick={() => window.location.href = '/live-drone'}
+              >
+                <Eye className="mr-2 h-5 w-5 animate-pulse" />
+                Live Drone Feed
               </Button>
               <Button 
                 size="lg" 
