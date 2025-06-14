@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,11 +14,13 @@ import {
   Zap,
   MessageSquare
 } from "lucide-react";
+import AllComplaints from "./AllComplaints";
 
 const VoiceComplaint = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState("Telugu");
   const [loaded, setLoaded] = useState(false);
+  const [showAllComplaints, setShowAllComplaints] = useState(false);
 
   useEffect(() => {
     setLoaded(true);
@@ -82,6 +83,24 @@ const VoiceComplaint = () => {
       default: return "text-gray-600";
     }
   };
+
+  if (showAllComplaints) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAllComplaints(false)}
+            className="hover:scale-105 transition-transform duration-300"
+          >
+            ← Back to Voice System
+          </Button>
+          <h2 className="text-2xl font-bold">Complete Complaints Management</h2>
+        </div>
+        <AllComplaints />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -199,7 +218,10 @@ const VoiceComplaint = () => {
                 </div>
               ))}
             </div>
-            <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 transform hover:scale-105 hover:shadow-xl transition-all duration-300 animate-glow">
+            <Button 
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 transform hover:scale-105 hover:shadow-xl transition-all duration-300 animate-glow"
+              onClick={() => setShowAllComplaints(true)}
+            >
               View All Complaints
             </Button>
           </CardContent>

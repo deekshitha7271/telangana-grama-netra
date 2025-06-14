@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +12,13 @@ import {
   Battery,
   Signal
 } from "lucide-react";
+import DroneFootage from "./DroneFootage";
 
 const DroneMonitoring = () => {
   const [activeDrones, setActiveDrones] = useState(8);
   const [scanningVillage, setScanningVillage] = useState("Kondapally");
   const [loaded, setLoaded] = useState(false);
+  const [showFootage, setShowFootage] = useState(false);
   
   useEffect(() => {
     setLoaded(true);
@@ -89,9 +90,26 @@ const DroneMonitoring = () => {
     }
   };
 
+  if (showFootage) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowFootage(false)}
+            className="hover:scale-105 transition-transform duration-300"
+          >
+            ← Back to Monitoring
+          </Button>
+          <h2 className="text-2xl font-bold">AI-Enhanced Drone Footage</h2>
+        </div>
+        <DroneFootage />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Live Drone Status */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {drones.map((drone, index) => (
           <Card 
@@ -147,7 +165,6 @@ const DroneMonitoring = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Village Scanning Status */}
         <Card className={`bg-white/80 backdrop-blur-sm border-0 animate-slide-up`} style={{ animationDelay: '0.4s' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -189,7 +206,6 @@ const DroneMonitoring = () => {
           </CardContent>
         </Card>
 
-        {/* Real-time Issue Detection */}
         <Card className={`bg-white/80 backdrop-blur-sm border-0 animate-slide-up`} style={{ animationDelay: '0.5s' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -218,7 +234,10 @@ const DroneMonitoring = () => {
                 </div>
               ))}
             </div>
-            <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 transform hover:scale-105 hover:shadow-xl transition-all duration-300 animate-glow">
+            <Button 
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 transform hover:scale-105 hover:shadow-xl transition-all duration-300 animate-glow"
+              onClick={() => setShowFootage(true)}
+            >
               <Camera className="h-4 w-4 mr-2 animate-pulse" />
               View Drone Footage
             </Button>
@@ -226,7 +245,6 @@ const DroneMonitoring = () => {
         </Card>
       </div>
 
-      {/* Current Scanning Display */}
       <Card className={`bg-gradient-to-r from-blue-500 to-green-500 text-white border-0 animate-gradient animate-slide-up`} style={{ animationDelay: '0.6s' }}>
         <CardContent className="p-6">
           <div className="text-center">
@@ -244,7 +262,6 @@ const DroneMonitoring = () => {
               </div>
             </div>
             
-            {/* Scanning Progress Indicator */}
             <div className="mt-6 w-full bg-white/20 rounded-full h-2 overflow-hidden">
               <div className="h-full bg-white animate-progress" style={{ width: '67%' }}></div>
             </div>
