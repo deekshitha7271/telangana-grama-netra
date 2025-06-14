@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,11 @@ import {
 const VoiceComplaint = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState("Telugu");
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    setLoaded(true);
+  }, []);
 
   const recentComplaints = [
     {
@@ -81,10 +86,10 @@ const VoiceComplaint = () => {
   return (
     <div className="space-y-6">
       {/* Voice Recording Interface */}
-      <Card className="bg-gradient-to-br from-orange-50 to-blue-50 border-0">
+      <Card className={`bg-gradient-to-br from-orange-50 to-blue-50 border-0 animate-slide-up`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-center justify-center">
-            <Languages className="h-6 w-6 text-orange-600" />
+            <Languages className="h-6 w-6 text-orange-600 animate-pulse" />
             Mana Mitram - Voice Complaint System
           </CardTitle>
         </CardHeader>
@@ -97,11 +102,11 @@ const VoiceComplaint = () => {
                   isRecording 
                     ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
                     : 'bg-orange-500 hover:bg-orange-600'
-                } text-white shadow-2xl`}
+                } text-white shadow-2xl transform hover:scale-110 transition-all duration-500 animate-glow`}
                 onClick={() => setIsRecording(!isRecording)}
               >
                 {isRecording ? (
-                  <MicOff className="h-12 w-12" />
+                  <MicOff className="h-12 w-12 animate-bounce" />
                 ) : (
                   <Mic className="h-12 w-12" />
                 )}
@@ -109,40 +114,40 @@ const VoiceComplaint = () => {
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-xl font-semibold text-gray-800">
+              <h3 className={`text-xl font-semibold text-gray-800 transition-all duration-500 ${isRecording ? 'animate-pulse' : ''}`}>
                 {isRecording ? "Recording..." : "Tap to Start Recording"}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 animate-fade-in">
                 Speak in Telugu, Hindi, or English - AI will understand and help!
               </p>
             </div>
 
             {isRecording && (
-              <div className="space-y-4">
+              <div className="space-y-4 animate-fade-in">
                 <div className="flex items-center justify-center gap-2">
-                  <Volume2 className="h-5 w-5 text-orange-600" />
+                  <Volume2 className="h-5 w-5 text-orange-600 animate-pulse" />
                   <Progress value={65} className="w-48" />
-                  <span className="text-sm text-gray-600">65%</span>
+                  <span className="text-sm text-gray-600 animate-pulse">65%</span>
                 </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 max-w-md mx-auto">
-                  <p className="text-sm text-gray-700 italic">
+                <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 max-w-md mx-auto transform hover:scale-105 transition-all duration-300 animate-bounce-in">
+                  <p className="text-sm text-gray-700 italic animate-fade-in">
                     "మా గ్రామంలో నీటి సమస్య ఉంది... పై[...]" 
                   </p>
-                  <p className="text-xs text-gray-500 mt-2">Detecting Telugu...</p>
+                  <p className="text-xs text-gray-500 mt-2 animate-pulse">Detecting Telugu...</p>
                 </div>
               </div>
             )}
 
             <div className="flex justify-center gap-4">
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Zap className="h-3 w-3" />
+              <Badge variant="outline" className="flex items-center gap-1 hover:scale-105 transition-transform duration-300">
+                <Zap className="h-3 w-3 animate-pulse" />
                 AI-Powered
               </Badge>
-              <Badge variant="outline" className="flex items-center gap-1">
+              <Badge variant="outline" className="flex items-center gap-1 hover:scale-105 transition-transform duration-300">
                 <Languages className="h-3 w-3" />
                 Multi-language
               </Badge>
-              <Badge variant="outline" className="flex items-center gap-1">
+              <Badge variant="outline" className="flex items-center gap-1 hover:scale-105 transition-transform duration-300">
                 <MessageSquare className="h-3 w-3" />
                 Auto-categorized
               </Badge>
@@ -153,34 +158,38 @@ const VoiceComplaint = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Voice Complaints */}
-        <Card className="bg-white/80 backdrop-blur-sm border-0">
+        <Card className={`bg-white/80 backdrop-blur-sm border-0 animate-slide-up`} style={{ animationDelay: '0.2s' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-blue-600" />
+              <MessageSquare className="h-5 w-5 text-blue-600 animate-pulse" />
               Recent Voice Complaints
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentComplaints.map((complaint) => (
-                <div key={complaint.id} className="border-l-4 border-orange-500 pl-4 py-3 bg-gray-50 rounded-r-lg">
+              {recentComplaints.map((complaint, index) => (
+                <div 
+                  key={complaint.id} 
+                  className={`border-l-4 border-orange-500 pl-4 py-3 bg-gray-50 rounded-r-lg hover:bg-orange-50 hover:border-l-8 hover:shadow-lg transform hover:scale-105 transition-all duration-300 animate-slide-up`}
+                  style={{ animationDelay: `${0.4 + index * 0.1}s` }}
+                >
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
+                    <div className="flex-1 group">
                       <div className="flex items-center gap-2 mb-1">
-                        <User className="h-4 w-4 text-gray-600" />
-                        <span className="font-semibold text-sm">{complaint.citizen}</span>
-                        <Badge variant="outline" className="text-xs">{complaint.language}</Badge>
+                        <User className="h-4 w-4 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
+                        <span className="font-semibold text-sm group-hover:text-blue-600 transition-colors duration-300">{complaint.citizen}</span>
+                        <Badge variant="outline" className="text-xs animate-bounce-in">{complaint.language}</Badge>
                       </div>
                       <div className="flex items-center gap-2 mb-2">
-                        <MapPin className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm text-gray-600">{complaint.village}</span>
+                        <MapPin className="h-4 w-4 text-gray-500 group-hover:text-orange-500 transition-colors duration-300" />
+                        <span className="text-sm text-gray-600 group-hover:text-orange-600 transition-colors duration-300">{complaint.village}</span>
                       </div>
-                      <p className="text-sm text-gray-800 mb-2">{complaint.issue}</p>
+                      <p className="text-sm text-gray-800 mb-2 group-hover:text-gray-900 transition-colors duration-300">{complaint.issue}</p>
                       <div className="flex items-center justify-between">
-                        <Badge className={`${getStatusColor(complaint.status)} text-white text-xs`}>
+                        <Badge className={`${getStatusColor(complaint.status)} text-white text-xs animate-pulse`}>
                           {complaint.status}
                         </Badge>
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-1 text-xs text-gray-500 group-hover:text-blue-500 transition-colors duration-300">
                           <Clock className="h-3 w-3" />
                           {complaint.time}
                         </div>
@@ -190,45 +199,56 @@ const VoiceComplaint = () => {
                 </div>
               ))}
             </div>
-            <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
+            <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 transform hover:scale-105 hover:shadow-xl transition-all duration-300 animate-glow">
               View All Complaints
             </Button>
           </CardContent>
         </Card>
 
         {/* Voice Booth Status */}
-        <Card className="bg-white/80 backdrop-blur-sm border-0">
+        <Card className={`bg-white/80 backdrop-blur-sm border-0 animate-slide-up`} style={{ animationDelay: '0.3s' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Mic className="h-5 w-5 text-green-600" />
+              <Mic className="h-5 w-5 text-green-600 animate-pulse" />
               Voice Booth Network Status
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {voiceBooths.map((booth) => (
-                <div key={booth.id} className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-gray-50 to-green-50">
-                  <div>
+              {voiceBooths.map((booth, index) => (
+                <div 
+                  key={booth.id} 
+                  className={`flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-gray-50 to-green-50 hover:shadow-lg transform hover:scale-105 transition-all duration-300 animate-slide-up`}
+                  style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+                >
+                  <div className="group">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold">{booth.id}</span>
-                      <Badge variant={booth.status === 'active' ? 'default' : 'secondary'}>
+                      <span className="font-semibold group-hover:text-green-600 transition-colors duration-300">{booth.id}</span>
+                      <Badge 
+                        variant={booth.status === 'active' ? 'default' : 'secondary'}
+                        className={`${booth.status === 'active' ? 'animate-pulse' : ''} transition-all duration-300`}
+                      >
                         {booth.status}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600">{booth.location}</p>
+                    <p className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors duration-300">{booth.location}</p>
                     <div className="flex items-center gap-4 mt-1">
-                      <span className="text-xs text-gray-500">Battery: {booth.battery}%</span>
-                      <span className="text-xs text-gray-500">Usage: {booth.usage}</span>
+                      <span className="text-xs text-gray-500 group-hover:text-green-500 transition-colors duration-300">
+                        Battery: {booth.battery}%
+                      </span>
+                      <span className="text-xs text-gray-500 group-hover:text-blue-500 transition-colors duration-300">
+                        Usage: {booth.usage}
+                      </span>
                     </div>
                   </div>
-                  <div className={`w-3 h-3 rounded-full ${booth.status === 'active' ? 'bg-green-500' : 'bg-orange-500'}`}>
+                  <div className={`w-3 h-3 rounded-full ${booth.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-orange-500'} transition-all duration-300`}>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div className={`mt-4 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all duration-300 animate-bounce-in`} style={{ animationDelay: '0.9s' }}>
               <div className="text-center">
-                <p className="text-sm font-semibold text-blue-800">Network Health: 87%</p>
+                <p className="text-sm font-semibold text-blue-800 animate-pulse">Network Health: 87%</p>
                 <p className="text-xs text-blue-600">3 of 4 booths operational</p>
               </div>
             </div>
