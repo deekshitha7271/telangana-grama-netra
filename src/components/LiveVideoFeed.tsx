@@ -3,14 +3,16 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  // Lucide icon selection limited per system context
-} from 'lucide-react';
+// import { Camera, ... } from 'lucide-react';
 
 interface LiveVideoFeedProps {
   isOnline: boolean;
   className?: string;
 }
+
+// DEMO: Always show mock video feed.
+const MOCK_VIDEO_URL = "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4";
+// To use HLS stream, swap MOCK_VIDEO_URL with your stream and use an HLS-compatible player.
 
 const LiveVideoFeed: React.FC<LiveVideoFeedProps> = ({ isOnline, className }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -19,7 +21,7 @@ const LiveVideoFeed: React.FC<LiveVideoFeedProps> = ({ isOnline, className }) =>
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    if (videoRef.current && isOnline) {
+    if (videoRef.current) {
       setHasError(false);
     }
   }, [isOnline]);
@@ -82,34 +84,40 @@ const LiveVideoFeed: React.FC<LiveVideoFeedProps> = ({ isOnline, className }) =>
             </Badge>
           </div>
 
-          {/* Video or Fallback */}
+          {/* Always show mock video feed */}
           <video
             ref={videoRef}
             className="w-full h-full object-cover rounded-3xl"
             autoPlay
             muted={isMuted}
             loop
+            controls={false}
             onError={() => setHasError(true)}
-            style={{ display: isOnline && !hasError ? "block" : "none" }}
+            style={{ display: hasError ? "none" : "block" }}
           >
-            <source src="/placeholder-drone-video.mp4" type="video/mp4" />
+            <source src={MOCK_VIDEO_URL} type="video/mp4" />
+            Your browser does not support the video tag.
           </video>
-
-          {/* Beautiful fallback overlay, matches your screenshot closely */}
-          {(!isOnline || hasError) && (
+          {/* Optional: Error fallback if mock video fails */}
+          {hasError && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#23202c] to-[#223868]">
               <div className="flex flex-col items-center justify-center">
-                {/* Camera icon fallback - using emoji here due to icon selection limits */}
                 <span style={{ fontSize: 84, opacity: 0.35 }} role="img" aria-label="camera">📷</span>
                 <h3 className="text-2xl md:text-3xl font-bold text-white mt-4 animate-pulse">
-                  Connecting to Live Feed...
+                  Cannot load video feed
                 </h3>
                 <p className="mt-2 text-base text-gray-400 font-medium">
-                  HLS stream will appear here in production
+                  Please check the video URL/network.
                 </p>
               </div>
             </div>
           )}
+
+          {/* Overlay demo for detections */}
+          <div className="absolute top-4 left-4 bg-black/70 text-white text-sm px-3 py-2 rounded-lg z-20 flex items-center gap-2 shadow">
+            {/* Example detection overlay */}
+            🚨 Detected: Water Body (18.7465, 78.5691)
+          </div>
 
           {/* Controls Overlay */}
           <div className="absolute bottom-0 left-0 w-full p-4 pointer-events-none">
@@ -124,7 +132,6 @@ const LiveVideoFeed: React.FC<LiveVideoFeedProps> = ({ isOnline, className }) =>
                   className="bg-white/10 border-white/20 text-white hover:bg-white/20 shadow"
                   aria-label="Play/Pause"
                 >
-                  {/* Play or Pause icon as emoji due to icon limit */}
                   <span>{isPlaying ? '⏸' : '▶️'}</span>
                 </Button>
                 <Button
@@ -135,7 +142,6 @@ const LiveVideoFeed: React.FC<LiveVideoFeedProps> = ({ isOnline, className }) =>
                   className="bg-white/10 border-white/20 text-white hover:bg-white/20 shadow"
                   aria-label="Mute/Unmute"
                 >
-                  {/* Speaker icon as emoji */}
                   <span>{isMuted ? '🔇' : '🔈'}</span>
                 </Button>
               </div>
@@ -161,7 +167,6 @@ const LiveVideoFeed: React.FC<LiveVideoFeedProps> = ({ isOnline, className }) =>
                   className="bg-white/10 border-white/20 text-white hover:bg-white/20 shadow"
                   aria-label="Fullscreen"
                 >
-                  {/* Fullscreen icon as emoji */}
                   <span>⛶</span>
                 </Button>
               </div>
@@ -174,5 +179,4 @@ const LiveVideoFeed: React.FC<LiveVideoFeedProps> = ({ isOnline, className }) =>
 };
 
 export default LiveVideoFeed;
-
 
