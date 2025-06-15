@@ -20,8 +20,6 @@ const AnnotationInput: React.FC<Props> = ({ onSubmit }) => {
   return (
     <form onSubmit={handleSubmit} className="flex items-end gap-2 bg-white/60 dark:bg-black/50 rounded-lg p-2 shadow-md">
       <Textarea
-        minRows={1}
-        maxRows={4}
         placeholder="Type what you observe here…"
         value={text}
         onChange={(e) => setText(e.target.value)}
