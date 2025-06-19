@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 import { 
   Mic, 
   MicOff, 
@@ -12,19 +13,210 @@ import {
   Clock, 
   User,
   Zap,
-  MessageSquare
+  MessageSquare,
+  Copy,
+  Send
 } from "lucide-react";
 import AllComplaints from "./AllComplaints";
 
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
+  onstart: () => void;
+  onend: () => void;
+  start(): void;
+  stop(): void;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognitionResultList extends Array<SpeechRecognitionResult> {
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
+
 const VoiceComplaint = () => {
   const [isRecording, setIsRecording] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState("Telugu");
+  const [currentLanguage, setCurrentLanguage] = useState("te-IN");
+  const [transcript, setTranscript] = useState("");
+  const [interimTranscript, setInterimTranscript] = useState("");
+  const [confidence, setConfidence] = useState(0);
+  const [isSupported, setIsSupported] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [showAllComplaints, setShowAllComplaints] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  const languages = [
+    { code: "te-IN", name: "Telugu", display: "తెలుగు" },
+    { code: "hi-IN", name: "Hindi", display: "हिंदी" },
+    { code: "en-IN", name: "English", display: "English" }
+  ];
 
   useEffect(() => {
     setLoaded(true);
+    // Check if speech recognition is supported
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setIsSupported(true);
+      recognitionRef.current = new SpeechRecognition();
+      setupSpeechRecognition();
+    } else {
+      setIsSupported(false);
+      toast.error("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.");
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
   }, []);
+
+  const setupSpeechRecognition = () => {
+    if (!recognitionRef.current) return;
+
+    const recognition = recognitionRef.current;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = currentLanguage;
+
+    recognition.onstart = () => {
+      console.log("Speech recognition started");
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let interimText = "";
+      let finalText = "";
+
+      for (let i = event.results.length - 1; i >= 0; i--) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          finalText = result[0].transcript;
+          setConfidence(Math.round(result[0].confidence * 100));
+        } else {
+          interimText = result[0].transcript;
+        }
+      }
+
+      if (finalText) {
+        setTranscript(prev => prev + finalText + " ");
+        setInterimTranscript("");
+      } else {
+        setInterimTranscript(interimText);
+      }
+    };
+
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      console.error("Speech recognition error:", event.error);
+      setIsRecording(false);
+      
+      switch (event.error) {
+        case "no-speech":
+          toast.error("No speech detected. Please try again.");
+          break;
+        case "audio-capture":
+          toast.error("No microphone found. Please check your microphone.");
+          break;
+        case "not-allowed":
+          toast.error("Microphone access denied. Please allow microphone access.");
+          break;
+        default:
+          toast.error(`Speech recognition error: ${event.error}`);
+      }
+    };
+
+    recognition.onend = () => {
+      console.log("Speech recognition ended");
+      setIsRecording(false);
+      setInterimTranscript("");
+    };
+  };
+
+  const toggleRecording = () => {
+    if (!isSupported || !recognitionRef.current) {
+      toast.error("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    if (isRecording) {
+      recognitionRef.current.stop();
+    } else {
+      // Update language before starting
+      recognitionRef.current.lang = currentLanguage;
+      recognitionRef.current.start();
+      toast.success("Listening... Speak now!");
+    }
+  };
+
+  const clearTranscript = () => {
+    setTranscript("");
+    setInterimTranscript("");
+    setConfidence(0);
+  };
+
+  const copyToClipboard = async () => {
+    if (transcript) {
+      try {
+        await navigator.clipboard.writeText(transcript);
+        toast.success("Text copied to clipboard!");
+      } catch (err) {
+        toast.error("Failed to copy text to clipboard.");
+      }
+    }
+  };
+
+  const submitComplaint = () => {
+    if (transcript.trim()) {
+      // Add the complaint to recent complaints (this would normally be sent to backend)
+      toast.success("Complaint submitted successfully!");
+      const selectedLang = languages.find(l => l.code === currentLanguage);
+      console.log("New complaint:", {
+        text: transcript,
+        language: selectedLang?.name || "Unknown",
+        timestamp: new Date().toISOString()
+      });
+      
+      // Clear the transcript after submission
+      clearTranscript();
+    } else {
+      toast.error("Please record some speech before submitting.");
+    }
+  };
+
+  const changeLanguage = (langCode: string) => {
+    setCurrentLanguage(langCode);
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = langCode;
+    }
+    const selectedLang = languages.find(l => l.code === langCode);
+    toast.success(`Language changed to ${selectedLang?.name}`);
+  };
 
   const recentComplaints = [
     {
@@ -109,72 +301,119 @@ const VoiceComplaint = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-center justify-center">
             <Languages className="h-6 w-6 text-orange-600 animate-pulse" />
-            Mana Mitram - Voice Complaint System
+            Mana Mitram - Live Voice Recognition
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center space-y-6">
-            <div className="flex justify-center">
-              <Button
-                size="lg"
-                className={`w-32 h-32 rounded-full ${
-                  isRecording 
-                    ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-                    : 'bg-orange-500 hover:bg-orange-600'
-                } text-white shadow-2xl transform hover:scale-110 transition-all duration-500 animate-glow`}
-                onClick={() => setIsRecording(!isRecording)}
-              >
-                {isRecording ? (
-                  <MicOff className="h-12 w-12 animate-bounce" />
-                ) : (
-                  <Mic className="h-12 w-12" />
-                )}
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className={`text-xl font-semibold text-gray-800 transition-all duration-500 ${isRecording ? 'animate-pulse' : ''}`}>
-                {isRecording ? "Recording..." : "Tap to Start Recording"}
-              </h3>
-              <p className="text-gray-600 animate-fade-in">
-                Speak in Telugu, Hindi, or English - AI will understand and help!
-              </p>
+          <div className="space-y-6">
+            {/* Language Selection */}
+            <div className="flex justify-center gap-2 flex-wrap">
+              {languages.map((lang) => (
+                <Button
+                  key={lang.code}
+                  variant={currentLanguage === lang.code ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => changeLanguage(lang.code)}
+                  className="transition-all duration-300 hover:scale-105"
+                >
+                  {lang.display}
+                </Button>
+              ))}
             </div>
 
-            {isRecording && (
-              <div className="space-y-4 animate-fade-in">
-                <div className="flex items-center justify-center gap-2">
-                  <Volume2 className="h-5 w-5 text-orange-600 animate-pulse" />
-                  <Progress value={65} className="w-48" />
-                  <span className="text-sm text-gray-600 animate-pulse">65%</span>
-                </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 max-w-md mx-auto transform hover:scale-105 transition-all duration-300 animate-bounce-in">
-                  <p className="text-sm text-gray-700 italic animate-fade-in">
-                    "మా గ్రామంలో నీటి సమస్య ఉంది... పై[...]" 
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2 animate-pulse">Detecting Telugu...</p>
-                </div>
+            {/* Recording Button */}
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <Button
+                  size="lg"
+                  disabled={!isSupported}
+                  className={`w-32 h-32 rounded-full ${
+                    isRecording 
+                      ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
+                      : 'bg-orange-500 hover:bg-orange-600'
+                  } text-white shadow-2xl transform hover:scale-110 transition-all duration-500 animate-glow disabled:opacity-50 disabled:cursor-not-allowed`}
+                  onClick={toggleRecording}
+                >
+                  {isRecording ? (
+                    <MicOff className="h-12 w-12 animate-bounce" />
+                  ) : (
+                    <Mic className="h-12 w-12" />
+                  )}
+                </Button>
               </div>
-            )}
+              
+              <div className="space-y-2">
+                <h3 className={`text-xl font-semibold text-gray-800 transition-all duration-500 ${isRecording ? 'animate-pulse' : ''}`}>
+                  {isRecording ? "Listening..." : isSupported ? "Tap to Start Recording" : "Speech Recognition Not Supported"}
+                </h3>
+                <p className="text-gray-600 animate-fade-in">
+                  {isSupported ? 
+                    `Speak in ${languages.find(l => l.code === currentLanguage)?.name} - AI will transcribe in real-time!` :
+                    "Please use Chrome, Edge, or Safari for speech recognition"
+                  }
+                </p>
+              </div>
 
-            <div className="flex justify-center gap-4">
-              <Badge variant="outline" className="flex items-center gap-1 hover:scale-105 transition-transform duration-300">
-                <Zap className="h-3 w-3 animate-pulse" />
-                AI-Powered
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-1 hover:scale-105 transition-transform duration-300">
-                <Languages className="h-3 w-3" />
-                Multi-language
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-1 hover:scale-105 transition-transform duration-300">
-                <MessageSquare className="h-3 w-3" />
-                Auto-categorized
-              </Badge>
+              {/* Live Transcript Display */}
+              {(transcript || interimTranscript) && (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 max-w-2xl mx-auto transform hover:scale-105 transition-all duration-300 min-h-[120px]">
+                    <div className="text-left space-y-2">
+                      {transcript && (
+                        <p className="text-gray-800 text-base leading-relaxed">
+                          {transcript}
+                        </p>
+                      )}
+                      {interimTranscript && (
+                        <p className="text-gray-500 italic text-base leading-relaxed">
+                          {interimTranscript}
+                        </p>
+                      )}
+                      {confidence > 0 && (
+                        <div className="flex items-center gap-2 justify-between pt-2 border-t">
+                          <span className="text-xs text-gray-500">
+                            Confidence: {confidence}%
+                          </span>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline" onClick={copyToClipboard}>
+                              <Copy className="h-3 w-3 mr-1" />
+                              Copy
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={clearTranscript}>
+                              Clear
+                            </Button>
+                            <Button size="sm" onClick={submitComplaint}>
+                              <Send className="h-3 w-3 mr-1" />
+                              Submit
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-center gap-4">
+                <Badge variant="outline" className="flex items-center gap-1 hover:scale-105 transition-transform duration-300">
+                  <Zap className="h-3 w-3 animate-pulse" />
+                  Live Recognition
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1 hover:scale-105 transition-transform duration-300">
+                  <Languages className="h-3 w-3" />
+                  Multi-language
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1 hover:scale-105 transition-transform duration-300">
+                  <MessageSquare className="h-3 w-3" />
+                  Real-time
+                </Badge>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Rest of the existing content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Voice Complaints */}
         <Card className={`bg-white/80 backdrop-blur-sm border-0 animate-slide-up`} style={{ animationDelay: '0.2s' }}>
