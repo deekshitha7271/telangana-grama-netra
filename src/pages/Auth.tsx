@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Drone, Shield, Users, BarChart3 } from "lucide-react";
+import { Eye, EyeOff, Plane, Shield, Users, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
@@ -35,7 +34,7 @@ const Auth = () => {
 
   const features = [
     {
-      icon: Drone,
+      icon: Plane,
       title: "Live Drone Monitoring",
       description: "Real-time aerial surveillance and monitoring"
     },
@@ -64,7 +63,7 @@ const Auth = () => {
         <div className="relative z-10">
           <div className="mb-8">
             <div className="flex items-center mb-4">
-              <Drone className="h-10 w-10 text-white mr-3" />
+              <Plane className="h-10 w-10 text-white mr-3" />
               <h1 className="text-3xl font-bold text-white">GramaNetra</h1>
             </div>
             <p className="text-blue-100 text-lg">
@@ -104,7 +103,7 @@ const Auth = () => {
           <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
               <div className="flex justify-center mb-4 lg:hidden">
-                <Drone className="h-12 w-12 text-blue-600" />
+                <Plane className="h-12 w-12 text-blue-600" />
               </div>
               <CardTitle className="text-2xl font-bold text-gray-900">
                 {isLogin ? 'Welcome Back' : 'Create Account'}
